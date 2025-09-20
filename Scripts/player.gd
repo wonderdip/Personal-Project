@@ -6,6 +6,12 @@ const GRAVITY = 9.8
 
 @onready var head = $Head
 @onready var camera = $Head/Camera3D
+@onready var gun_anim = $Head/Camera3D/Rifle/AnimationPlayer
+@onready var gun_barrel = $Head/Camera3D/Rifle/RayCast3D
+
+var bullet = preload("res://Scenes/bullet.tscn")
+var bullet_instance
+
 
 #Player vars
 @export_range(1.0, 10, 0.5) var SPEED = 5.0
@@ -31,6 +37,7 @@ var t_bob = 0.0
 var pitch := 0.0
 
 var mouse_unlocked := false
+var target_velocity = Vector3.ZERO
 
 func _ready() -> void:
 	Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
@@ -92,40 +99,75 @@ func _physics_process(delta: float) -> void:
 	var input_dir = Input.get_vector("left", "right", "up", "down")
 	var direction = (head.transform.basis * Vector3(input_dir.x, 0, input_dir.y)).normalized()
 	
+	# Horizontal velocity only
+	var horizontal_velocity = Vector3(velocity.x, 0, velocity.z)
+	
 	if is_on_floor():
 		if direction != Vector3.ZERO:
+			# Pick target speed (sprint or normal)
 			var target_speed = SPEED
 			if Input.is_action_pressed("sprint"):
 				target_speed *= sprint_multiplier
 			
-			#Smooth Acceleration
-			velocity.x = move_toward(velocity.x, direction.x * target_speed, ACCELERATION * delta)
-			velocity.z = move_toward(velocity.z, direction.z * target_speed, ACCELERATION * delta)
+			# Current horizontal speed
+			var speed = horizontal_velocity.length()
+			
+			# Accelerate toward target speed
+			speed = move_toward(speed, target_speed, ACCELERATION * delta)
+			
+			# Snap instantly to new direction
+			horizontal_velocity = direction * speed
 		else:
-			#Smooth Deceleration
-			velocity.x = move_toward(velocity.x, 0, DEACCELERATION * delta)
-			velocity.z = move_toward(velocity.z, 0, DEACCELERATION * delta)
+			# No input → decelerate to zero
+			var speed = horizontal_velocity.length()
+			speed = move_toward(speed, 0, DEACCELERATION * delta)
+			
+			if speed > 0.01:
+				horizontal_velocity = horizontal_velocity.normalized() * speed
+			else:
+				horizontal_velocity = Vector3.ZERO
 	else:
-		var air_control_factor = 4.0  # higher = more control in air
-		velocity.x = lerp(velocity.x, direction.x * SPEED, delta * air_control_factor)
-		velocity.z = lerp(velocity.z, direction.z * SPEED, delta * air_control_factor)
+		# --- AIR CONTROL ---
+		if direction != Vector3.ZERO:
+			var air_control_factor = 4.0  # tweak for stronger/weaker steering
+			# Preserve speed magnitude
+			var speed = horizontal_velocity.length()
+			#If input is after jump give a lil speed
+			if speed < 0.1:
+				speed = SPEED * 0.5
+				
+			# Blend current direction toward input direction
+			var new_dir = horizontal_velocity.normalized().lerp(direction, air_control_factor * delta).normalized()
+			horizontal_velocity = new_dir * speed
 		
+		
+	# Apply back to velocity
+	velocity.x = horizontal_velocity.x
+	velocity.z = horizontal_velocity.z
+	
 	#headbob
 	t_bob += delta * velocity.length() * float(is_on_floor())
 	camera.transform.origin = headbob(t_bob)
 	
-
+	if Input.is_action_pressed("shoot"):
+		if !gun_anim.is_playing():
+			gun_anim.play("Shoot")
+			bullet_instance = bullet.instantiate()
+			bullet_instance.position = gun_barrel.global_position
+			bullet_instance.transform.basis = gun_barrel.global_transform.basis
+			get_parent().add_child(bullet_instance)
+	
 	# Move the character
 	move_and_slide()
 	
 	#FOV
 	var horizontal_speed = Vector2(velocity.x, velocity.z).length()
 	var speed_fraction = clamp(horizontal_speed / SPEED, 0.0, 1.0)
-
+	
 	# Increase FOV for sprinting
 	var sprint_factor = 1.5 if Input.is_action_pressed("sprint") else 1.0
 	var target_fov = Base_FOV + FOV_multiplier * speed_fraction * sprint_factor
-
+	
 	camera.fov = lerp(camera.fov, target_fov, delta * 12.0)
 	
 func headbob(time) -> Vector3:

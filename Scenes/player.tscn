@@ -1,6 +1,7 @@
-[gd_scene load_steps=4 format=3 uid="uid://bioy0d6p5qg08"]
+[gd_scene load_steps=5 format=3 uid="uid://bioy0d6p5qg08"]
 
 [ext_resource type="Script" uid="uid://cju17hk0shusr" path="res://Scripts/player.gd" id="1_4flbx"]
+[ext_resource type="PackedScene" uid="uid://vnablpk17dba" path="res://Scenes/Rifle.tscn" id="2_cvnsp"]
 
 [sub_resource type="CapsuleMesh" id="CapsuleMesh_4mr10"]
 
@@ -9,6 +10,8 @@ points = PackedVector3Array(-0.12520654, -0.532801, -0.4805069, 0.022783129, 0.4
 
 [node name="CharacterBody3D" type="CharacterBody3D"]
 script = ExtResource("1_4flbx")
+FALL_MULTIPLIER = 2.0
+LOW_JUMP_MULTIPLIER = 2.5
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="."]
 mesh = SubResource("CapsuleMesh_4mr10")
@@ -20,3 +23,6 @@ shape = SubResource("ConvexPolygonShape3D_5tb81")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.6358626, 0)
 
 [node name="Camera3D" type="Camera3D" parent="Head"]
+
+[node name="Rifle" parent="Head/Camera3D" instance=ExtResource("2_cvnsp")]
+transform = Transform3D(0.0021042433, 0, -0.0499557, 0, 0.05, 0, 0.0499557, 0, 0.0021042433, 0.4029745, -0.23230338, -0.43135697)
