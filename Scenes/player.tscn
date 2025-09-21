@@ -1,7 +1,8 @@
-[gd_scene load_steps=6 format=3 uid="uid://bioy0d6p5qg08"]
+[gd_scene load_steps=7 format=3 uid="uid://bioy0d6p5qg08"]
 
 [ext_resource type="Script" uid="uid://cju17hk0shusr" path="res://Scripts/player.gd" id="1_4flbx"]
 [ext_resource type="PackedScene" uid="uid://vnablpk17dba" path="res://Scenes/Weapons/Rifle.tscn" id="2_cvnsp"]
+[ext_resource type="Script" uid="uid://ddhgqjl727q6r" path="res://Scripts/camera_3d.gd" id="2_vgqql"]
 [ext_resource type="PackedScene" uid="uid://cqtk5ojyi8mtk" path="res://Scenes/Weapons/LMG.tscn" id="3_6t5aa"]
 
 [sub_resource type="CapsuleMesh" id="CapsuleMesh_4mr10"]
@@ -13,22 +14,28 @@ points = PackedVector3Array(-0.12520654, -0.532801, -0.4805069, 0.022783129, 0.4
 script = ExtResource("1_4flbx")
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+visible = false
 mesh = SubResource("CapsuleMesh_4mr10")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
 shape = SubResource("ConvexPolygonShape3D_5tb81")
 
 [node name="Head" type="Node3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.6358626, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.6358626, -0.23584872)
 
 [node name="Camera3D" type="Camera3D" parent="Head"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.17801166, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.0022559166, 0.17801166, -0.0036808252)
+script = ExtResource("2_vgqql")
 
 [node name="CurrentGun" type="Node3D" parent="Head/Camera3D"]
+transform = Transform3D(0.8, 0, 0, 0, 0.8, 0, 0, 0, 0.8, -0.0022559166, -0.12139928, -0.09197706)
 
 [node name="Rifle" parent="Head/Camera3D/CurrentGun" instance=ExtResource("2_cvnsp")]
-transform = Transform3D(0.0021042433, 0, -0.0499557, 0, 0.05, 0, 0.0499557, 0, 0.0021042433, 0.4029745, -0.17241395, -0.480896)
+transform = Transform3D(0.0021042433, 0, -0.0499557, 0, 0.05, 0, 0.0499557, 0, 0.0021042433, 0.4029745, -0.12898254, -0.57278776)
 
 [node name="LMG" parent="Head/Camera3D/CurrentGun" instance=ExtResource("3_6t5aa")]
-transform = Transform3D(0.0027727797, 0, -0.049923062, 0, 0.049999997, 0, 0.049923062, 0, 0.0027727797, 0.37, -0.241, -0.539)
+transform = Transform3D(0.0027727797, 0, -0.049923062, 0, 0.049999997, 0, 0.049923062, 0, 0.0027727797, 0.3991648, -0.18196827, -0.60246617)
 visible = false
+Weight = 12.5
+
+[node name="Hands" type="Node3D" parent="Head/Camera3D/CurrentGun"]

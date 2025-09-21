@@ -2,7 +2,7 @@ extends CharacterBody3D
 
 
 const SENSITIVITY = 0.003
-const GRAVITY = 9.8
+var GRAVITY = 9.8
 
 @onready var head = $Head
 @onready var camera = $Head/Camera3D
@@ -12,7 +12,7 @@ var gun_barrel : RayCast3D
 var gun_anim : AnimationPlayer
 var active_index := 0
 var is_scoping = false
-
+var gun : Node3D
 var bullet = preload("res://Scenes/bullet.tscn")
 var bullet_instance
 
@@ -27,6 +27,8 @@ var bullet_instance
 @export_range(0.1, 0.5, 0.02) var COYOTE_TIME = 0.2
 @export_range(1.0, 3.0, 0.1) var FALL_MULTIPLIER = 1.5
 @export_range(1.0, 3.0, 0.1) var LOW_JUMP_MULTIPLIER = 2.0
+var base_speed : float
+var base_gravity : float
 
 var Jump_buffer = 0.2
 var coyote_timer = 0.0
@@ -37,6 +39,8 @@ var FOV_multiplier = 12
 const BOB_FREQ = 2.4
 const BOB_AMP = 0.08
 var t_bob = 0.0
+var headbob_offset := Vector3.ZERO
+var shake_offset := Vector3.ZERO
 
 var pitch := 0.0
 
@@ -45,6 +49,8 @@ var target_velocity = Vector3.ZERO
 
 func _ready() -> void:
 	Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
+	base_gravity = GRAVITY
+	base_speed = SPEED
 	update_current_gun()
 	
 func _unhandled_input(event: InputEvent) -> void:
@@ -64,19 +70,29 @@ func _unhandled_input(event: InputEvent) -> void:
 			else:
 				mouse_unlocked = true
 				Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
-			
+				
+	if event is InputEventMouseButton:
+		if event.pressed:
+			if event.button_index == MOUSE_BUTTON_WHEEL_UP:
+				switch_gun(-1)
+				if gun_anim and gun_anim.has_animation("Swap"):
+					gun_anim.play("Swap")
+			elif event.button_index == MOUSE_BUTTON_WHEEL_DOWN:
+				switch_gun(1)
+				if gun_anim and gun_anim.has_animation("Swap"):
+					gun_anim.play("Swap")
+					
 func _input(event: InputEvent) -> void:
 	if mouse_unlocked and event is InputEventMouseButton and event.pressed:
 		mouse_unlocked = false
 		Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
 		
 func _physics_process(delta: float) -> void:
-	if Input.is_action_just_pressed("scroll_down"):
-		switch_gun(1)
-		gun_anim.play("Swap")
-	elif Input.is_action_just_pressed("scroll_up"):
-		gun_anim.play("Swap")
-		switch_gun(-1)
+	
+	if is_on_wall_only():
+		camera.rotation = Vector3(0,0,0)
+	else:
+		camera.rotation = Vector3.ZERO
 		
 	# Apply gravity
 	if not is_on_floor():
@@ -117,6 +133,7 @@ func _physics_process(delta: float) -> void:
 		if direction != Vector3.ZERO:
 			# Pick target speed (sprint or normal)
 			var target_speed = SPEED
+			
 			if Input.is_action_pressed("sprint"):
 				target_speed *= sprint_multiplier
 			
@@ -139,6 +156,7 @@ func _physics_process(delta: float) -> void:
 				horizontal_velocity = Vector3.ZERO
 	else:
 		# --- AIR CONTROL ---
+		
 		if direction != Vector3.ZERO:
 			var air_control_factor = 4.0  # tweak for stronger/weaker steering
 			# Preserve speed magnitude
@@ -158,17 +176,24 @@ func _physics_process(delta: float) -> void:
 	
 	#headbob
 	t_bob += delta * velocity.length() * float(is_on_floor())
-	camera.transform.origin = headbob(t_bob)
+	headbob_offset = headbob(t_bob)
+
+	# Final camera position = headbob + shake
+	camera.transform.origin = headbob_offset + shake_offset
+	gun.transform.origin = headbob_offset + shake_offset - Vector3(-0.24,0.05,0.2)
 	
-	if Input.is_action_pressed("shoot"):
+	if Input.is_action_pressed("shoot") and gun_barrel:
 		shoot()
+		camera.start_shake()
+	else:
+		camera.stop_shake()
 	
 	if Input.is_action_pressed("right_click") and gun_anim.has_animation("Scope"):
 		if !is_scoping:
 			gun_anim.play("Scope")
 			is_scoping = true
 	else:
-		if is_scoping:
+		if is_scoping and gun_anim.has_animation("Unscope"):
 			gun_anim.play("Unscope")
 		is_scoping = false
 	
@@ -184,7 +209,7 @@ func _physics_process(delta: float) -> void:
 	var target_fov = Base_FOV + FOV_multiplier * speed_fraction * sprint_factor
 	
 	camera.fov = lerp(camera.fov, target_fov, delta * 12.0)
-		
+	
 func headbob(time) -> Vector3:
 	var pos = Vector3.ZERO
 	pos.y = sin(time * BOB_FREQ) * BOB_AMP
@@ -192,45 +217,63 @@ func headbob(time) -> Vector3:
 	return pos
 	
 func shoot():
+	# No gun equipped
 	if gun_anim == null or gun_barrel == null:
-		return  # safety
+		return  
 		
 	if !gun_anim.is_playing():
-		if is_scoping == true:
-			if gun_anim.has_animation("Scope"):
-				gun_anim.play("Scope_Shot")
-		else:
+		if is_scoping and gun_anim.has_animation("Scope_Shot"):
+			gun_anim.play("Scope_Shot")
+		elif gun_anim.has_animation("Shoot"):
 			gun_anim.play("Shoot")
-		bullet_instance = bullet.instantiate()
-		bullet_instance.position = gun_barrel.global_position
-		bullet_instance.transform.basis = gun_barrel.global_transform.basis
-		get_parent().add_child(bullet_instance)
+		
+		# Only spawn bullets if we have a barrel
+		if gun_barrel:
+			bullet_instance = bullet.instantiate()
+			bullet_instance.position = gun_barrel.global_position
+			bullet_instance.transform.basis = gun_barrel.global_transform.basis
+			get_parent().add_child(bullet_instance)
 		
 func update_current_gun():
+	# Always reset to base values first
+	SPEED = base_speed
+	GRAVITY = base_gravity
+	
+	# Clear references
+	gun_anim = null
+	gun_barrel = null
+	
 	if current_gun_node.get_child_count() == 0:
 		return
-	var gun = current_gun_node.get_child(active_index)
-	gun_anim = gun.get_node("AnimationPlayer")
-	gun_barrel = gun.get_node("RayCast3D")
+		
+	gun = current_gun_node.get_child(active_index)
+	
+	# Only treat this as a weapon if it's in the Weapons group
+	if gun.is_in_group("Weapons"):
+		if gun.has_node("AnimationPlayer"):
+			gun_anim = gun.get_node("AnimationPlayer")
+		if gun.has_node("RayCast3D"):
+			gun_barrel = gun.get_node("RayCast3D")
+			
+		# Handle weight if exported - use proper calculations
+		if "Weight" in gun:
+			var weight = gun.Weight
+			# Clamp weight to reasonable values to prevent issues
+			weight = clamp(weight, 0, 50)  # Adjust max as needed
+			
+			# Apply weight effects (modify from base values)
+			SPEED = max(base_speed - (weight * 0.1), base_speed * 0.2)  # Min 20% of base speed
+			GRAVITY = max(base_gravity + (weight * 0.08), base_gravity * 0.1)  # Min 10% of base gravity
 	
 func switch_gun(order: int):
 	var count = current_gun_node.get_child_count()
 	if count == 0:
 		return
 	
-	active_index = (active_index + order) % count
-	if active_index < 0:
-		active_index = count - 1
+	# Proper wrapping for both directions
+	active_index = (active_index + order + count) % count
 	
 	for i in range(count):
 		current_gun_node.get_child(i).visible = (i == active_index)
 	
 	update_current_gun()
-	
-	
-	
-	
-	
-	
-	
-	

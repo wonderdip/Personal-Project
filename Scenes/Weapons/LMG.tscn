@@ -1,4 +1,6 @@
-[gd_scene load_steps=18 format=4 uid="uid://cqtk5ojyi8mtk"]
+[gd_scene load_steps=19 format=4 uid="uid://cqtk5ojyi8mtk"]
+
+[ext_resource type="Script" uid="uid://vtua18gsi2sy" path="res://Scripts/Weapons/GunStats.gd" id="1_vmwmp"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_15pxt"]
 resource_name = "Dark Grey"
@@ -294,10 +296,10 @@ tracks/0/path = NodePath("Meshes:position")
 tracks/0/interp = 1
 tracks/0/loop_wrap = true
 tracks/0/keys = {
-"times": PackedFloat32Array(0.00031517784, 0.012134344, 0.04886358),
-"transitions": PackedFloat32Array(1, 1, 1),
+"times": PackedFloat32Array(0, 0.012134344, 0.017539063, 0.020078124, 0.04886358),
+"transitions": PackedFloat32Array(1, 1, 1, 1, 1),
 "update": 0,
-"values": [Vector3(0, 0, 0), Vector3(0.6, 0, 0), Vector3(0, 0, 0)]
+"values": [Vector3(0, 0, 0), Vector3(0.6, 0, 0), Vector3(0, 0, 1), Vector3(0, 0, -1), Vector3(0, 0, 0)]
 }
 tracks/1/type = "value"
 tracks/1/imported = false
@@ -306,7 +308,7 @@ tracks/1/path = NodePath("Meshes:rotation")
 tracks/1/interp = 1
 tracks/1/loop_wrap = true
 tracks/1/keys = {
-"times": PackedFloat32Array(0.00015758889, 0.015443712, 0.04870599),
+"times": PackedFloat32Array(0, 0.015443712, 0.04870599),
 "transitions": PackedFloat32Array(1, 1, 1),
 "update": 0,
 "values": [Vector3(0, 0, 0), Vector3(0, 0, -0.08726646), Vector3(0, 0, 0)]
@@ -337,6 +339,8 @@ _data = {
 
 [node name="LMG" type="Node3D"]
 transform = Transform3D(0.05, 0, 0, 0, 0.05, 0, 0, 0, 0.05, 0, 0, 0)
+script = ExtResource("1_vmwmp")
+Weight = 5.5
 
 [node name="Meshes" type="Node3D" parent="."]
 

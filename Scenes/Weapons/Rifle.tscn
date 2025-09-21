@@ -1,4 +1,6 @@
-[gd_scene load_steps=16 format=4 uid="uid://vnablpk17dba"]
+[gd_scene load_steps=18 format=4 uid="uid://vnablpk17dba"]
+
+[ext_resource type="Script" uid="uid://vtua18gsi2sy" path="res://Scripts/Weapons/GunStats.gd" id="1_5fovd"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_wyhkh"]
 resource_name = "Light Grey"
@@ -212,6 +214,76 @@ tracks/1/keys = {
 "update": 0,
 "values": [Vector3(0, 0, 0)]
 }
+tracks/2/type = "value"
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/path = NodePath("RayCast3D:position")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Vector3(-24, 0, 0)]
+}
+
+[sub_resource type="Animation" id="Animation_5fovd"]
+resource_name = "Scope"
+length = 0.15
+step = 0.01
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Cube:position")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0.0005149597, 0.14324546),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [Vector3(0, 0, 0), Vector3(-2, 0, 7)]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("RayCast3D:position")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0, 0.1427305),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [Vector3(-24, 0, 0), Vector3(-26, 0, 7)]
+}
+
+[sub_resource type="Animation" id="Animation_3xxsy"]
+resource_name = "Scope_Shot"
+length = 0.1
+step = 0.01
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Cube:position")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.011584894, 0.08576273),
+"transitions": PackedFloat32Array(1, 1, 1),
+"update": 0,
+"values": [Vector3(-2, 0, 7), Vector3(-1.4, 0.1, 7), Vector3(-2, 0, 7)]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("Cube:rotation")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(-0.0010849475, 0.019962136, 0.09134189),
+"transitions": PackedFloat32Array(1, 1, 1),
+"update": 0,
+"values": [Vector3(0, 0, 0), Vector3(0, 0, -0.05235988), Vector3(0, 0, 0)]
+}
 
 [sub_resource type="Animation" id="Animation_i8ad3"]
 resource_name = "Shoot"
@@ -258,23 +330,6 @@ tracks/0/keys = {
 "update": 0,
 "values": [Vector3(0, 0, 0), Vector3(0, -5, 0), Vector3(0, 0, 0)]
 }
-
-[sub_resource type="Animation" id="Animation_5fovd"]
-resource_name = "Scope"
-length = 0.15
-step = 0.01
-tracks/0/type = "value"
-tracks/0/imported = false
-tracks/0/enabled = true
-tracks/0/path = NodePath("Cube:position")
-tracks/0/interp = 1
-tracks/0/loop_wrap = true
-tracks/0/keys = {
-"times": PackedFloat32Array(0.0005149597, 0.14324546),
-"transitions": PackedFloat32Array(1, 1),
-"update": 0,
-"values": [Vector3(0, 0, 0), Vector3(-2, 0, 8)]
-}
 tracks/1/type = "value"
 tracks/1/imported = false
 tracks/1/enabled = true
@@ -282,10 +337,10 @@ tracks/1/path = NodePath("RayCast3D:position")
 tracks/1/interp = 1
 tracks/1/loop_wrap = true
 tracks/1/keys = {
-"times": PackedFloat32Array(0, 0.1427305),
-"transitions": PackedFloat32Array(1, 1),
+"times": PackedFloat32Array(0.19824682),
+"transitions": PackedFloat32Array(1),
 "update": 0,
-"values": [Vector3(-24, 0, 0), Vector3(-26, 0, 8)]
+"values": [Vector3(-24, 0, 0)]
 }
 
 [sub_resource type="Animation" id="Animation_0ns2h"]
@@ -317,10 +372,9 @@ tracks/1/keys = {
 "values": [Vector3(-26, 0, 8), Vector3(-24, 0, 0)]
 }
 
-[sub_resource type="Animation" id="Animation_3xxsy"]
-resource_name = "Scope_Shot"
-length = 0.1
-step = 0.01
+[sub_resource type="Animation" id="Animation_pqb4q"]
+resource_name = "Walk"
+capture_included = true
 tracks/0/type = "value"
 tracks/0/imported = false
 tracks/0/enabled = true
@@ -328,22 +382,10 @@ tracks/0/path = NodePath("Cube:position")
 tracks/0/interp = 1
 tracks/0/loop_wrap = true
 tracks/0/keys = {
-"times": PackedFloat32Array(0, 0.011584894, 0.08576273),
-"transitions": PackedFloat32Array(1, 1, 1),
-"update": 0,
-"values": [Vector3(-2, 0, 8), Vector3(-1.4, 0.1, 8), Vector3(-2, 0, 8)]
-}
-tracks/1/type = "value"
-tracks/1/imported = false
-tracks/1/enabled = true
-tracks/1/path = NodePath("Cube:rotation")
-tracks/1/interp = 1
-tracks/1/loop_wrap = true
-tracks/1/keys = {
-"times": PackedFloat32Array(0, 0.019962136, 0.09134189),
-"transitions": PackedFloat32Array(1, 1, 1),
-"update": 0,
-"values": [Vector3(0, 0, 0), Vector3(0, 0, -0.05235988), Vector3(0, 0, 0)]
+"times": PackedFloat32Array(0.00854454, 0.17973071, 0.3274186, 0.48890153, 0.65403384, 0.78999674, 0.9894721),
+"transitions": PackedFloat32Array(1, 1, 1, 1, 1, 1, 1),
+"update": 2,
+"values": [Vector3(0, 1, 0), Vector3(0, -1, 1.5), Vector3(0, 0.5, 2), Vector3(0, 1, 0), Vector3(0, -1, -1.5), Vector3(0, 0, -2), Vector3(0, 1, 0)]
 }
 
 [sub_resource type="AnimationLibrary" id="AnimationLibrary_13okl"]
@@ -353,11 +395,14 @@ _data = {
 &"Scope_Shot": SubResource("Animation_3xxsy"),
 &"Shoot": SubResource("Animation_i8ad3"),
 &"Swap": SubResource("Animation_5pbjw"),
-&"Unscope": SubResource("Animation_0ns2h")
+&"Unscope": SubResource("Animation_0ns2h"),
+&"Walk": SubResource("Animation_pqb4q")
 }
 
 [node name="Rifle" type="Node3D"]
 transform = Transform3D(0.05, 0, 0, 0, 0.05, 0, 0, 0, 0.05, 0, 0, 0)
+script = ExtResource("1_5fovd")
+Weight = 2.0
 
 [node name="Cube" type="MeshInstance3D" parent="."]
 cast_shadow = 0
