@@ -36,8 +36,6 @@ shadow_enabled = true
 
 [node name="Player" parent="." instance=ExtResource("1_a02cp")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.91635156, 0)
-FALL_MULTIPLIER = 2.0
-LOW_JUMP_MULTIPLIER = 2.5
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
 environment = SubResource("Environment_5tb81")

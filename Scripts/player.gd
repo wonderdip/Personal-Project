@@ -6,8 +6,12 @@ const GRAVITY = 9.8
 
 @onready var head = $Head
 @onready var camera = $Head/Camera3D
-@onready var gun_anim = $Head/Camera3D/Rifle/AnimationPlayer
-@onready var gun_barrel = $Head/Camera3D/Rifle/RayCast3D
+
+@onready var current_gun_node: Node3D = $Head/Camera3D/CurrentGun
+var gun_barrel : RayCast3D
+var gun_anim : AnimationPlayer
+var active_index := 0
+var is_scoping = false
 
 var bullet = preload("res://Scenes/bullet.tscn")
 var bullet_instance
@@ -41,7 +45,8 @@ var target_velocity = Vector3.ZERO
 
 func _ready() -> void:
 	Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
-
+	update_current_gun()
+	
 func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventMouseMotion and !mouse_unlocked:
 		# Rotate head (yaw)
@@ -66,7 +71,13 @@ func _input(event: InputEvent) -> void:
 		Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
 		
 func _physics_process(delta: float) -> void:
-	
+	if Input.is_action_just_pressed("scroll_down"):
+		switch_gun(1)
+		gun_anim.play("Swap")
+	elif Input.is_action_just_pressed("scroll_up"):
+		gun_anim.play("Swap")
+		switch_gun(-1)
+		
 	# Apply gravity
 	if not is_on_floor():
 		if velocity.y < 0:
@@ -150,12 +161,16 @@ func _physics_process(delta: float) -> void:
 	camera.transform.origin = headbob(t_bob)
 	
 	if Input.is_action_pressed("shoot"):
-		if !gun_anim.is_playing():
-			gun_anim.play("Shoot")
-			bullet_instance = bullet.instantiate()
-			bullet_instance.position = gun_barrel.global_position
-			bullet_instance.transform.basis = gun_barrel.global_transform.basis
-			get_parent().add_child(bullet_instance)
+		shoot()
+	
+	if Input.is_action_pressed("right_click") and gun_anim.has_animation("Scope"):
+		if !is_scoping:
+			gun_anim.play("Scope")
+			is_scoping = true
+	else:
+		if is_scoping:
+			gun_anim.play("Unscope")
+		is_scoping = false
 	
 	# Move the character
 	move_and_slide()
@@ -169,9 +184,53 @@ func _physics_process(delta: float) -> void:
 	var target_fov = Base_FOV + FOV_multiplier * speed_fraction * sprint_factor
 	
 	camera.fov = lerp(camera.fov, target_fov, delta * 12.0)
-	
+		
 func headbob(time) -> Vector3:
 	var pos = Vector3.ZERO
 	pos.y = sin(time * BOB_FREQ) * BOB_AMP
 	pos.x = cos(time * BOB_FREQ / 2) * BOB_AMP
 	return pos
+	
+func shoot():
+	if gun_anim == null or gun_barrel == null:
+		return  # safety
+		
+	if !gun_anim.is_playing():
+		if is_scoping == true:
+			if gun_anim.has_animation("Scope"):
+				gun_anim.play("Scope_Shot")
+		else:
+			gun_anim.play("Shoot")
+		bullet_instance = bullet.instantiate()
+		bullet_instance.position = gun_barrel.global_position
+		bullet_instance.transform.basis = gun_barrel.global_transform.basis
+		get_parent().add_child(bullet_instance)
+		
+func update_current_gun():
+	if current_gun_node.get_child_count() == 0:
+		return
+	var gun = current_gun_node.get_child(active_index)
+	gun_anim = gun.get_node("AnimationPlayer")
+	gun_barrel = gun.get_node("RayCast3D")
+	
+func switch_gun(order: int):
+	var count = current_gun_node.get_child_count()
+	if count == 0:
+		return
+	
+	active_index = (active_index + order) % count
+	if active_index < 0:
+		active_index = count - 1
+	
+	for i in range(count):
+		current_gun_node.get_child(i).visible = (i == active_index)
+	
+	update_current_gun()
+	
+	
+	
+	
+	
+	
+	
+	

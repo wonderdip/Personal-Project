@@ -12,11 +12,10 @@ emission = Color(0.13768512, 0.33894986, 0.6177695, 1)
 emission_energy_multiplier = 10.0
 
 [node name="Bullet" type="Node3D"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.5, 0, 0)
 script = ExtResource("1_xjght")
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="."]
-transform = Transform3D(-6.556708e-08, 0, -1.5, 0, 1.5, 0, 1.5, 0, -6.556708e-08, -0.7, 0, 0)
+transform = Transform3D(-6.556708e-08, 0, -1.5, 0, 1.5, 0, 1.5, 0, -6.556708e-08, -0.4, 0, 0)
 mesh = SubResource("BoxMesh_oduel")
 surface_material_override/0 = SubResource("StandardMaterial3D_ycag2")
 
