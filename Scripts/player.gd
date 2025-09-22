@@ -91,8 +91,6 @@ func _physics_process(delta: float) -> void:
 	
 	if is_on_wall_only():
 		camera.rotation = Vector3(0,0,0)
-	else:
-		camera.rotation = Vector3.ZERO
 		
 	# Apply gravity
 	if not is_on_floor():

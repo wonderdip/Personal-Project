@@ -316,7 +316,7 @@ tracks/1/keys = {
 
 [sub_resource type="Animation" id="Animation_r1siv"]
 resource_name = "Swap"
-length = 0.2
+length = 0.8
 tracks/0/type = "value"
 tracks/0/imported = false
 tracks/0/enabled = true
@@ -324,8 +324,8 @@ tracks/0/path = NodePath("Meshes:position")
 tracks/0/interp = 1
 tracks/0/loop_wrap = true
 tracks/0/keys = {
-"times": PackedFloat32Array(0.00015758889, 0.100227155, 0.19665295),
-"transitions": PackedFloat32Array(1, 1, 1),
+"times": PackedFloat32Array(0.00015758889, 0.40043586, 0.786139),
+"transitions": PackedFloat32Array(1, 1, 10.1964655),
 "update": 0,
 "values": [Vector3(0, 0, 0), Vector3(0, -5, 0), Vector3(0, 0, 0)]
 }
