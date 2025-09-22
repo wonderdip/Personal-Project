@@ -18,12 +18,12 @@ var bullet_instance
 
 
 #Player vars
-@export_range(1.0, 10, 0.5) var SPEED = 5.0
+@export_range(1.0, 10, 0.5) var SPEED = 10.0
 @export_range(1.0, 10, 0.5) var JUMP_VELOCITY = 6.0
 @export_range(1.0, 3.0, 0.1) var sprint_multiplier = 1.5
 @export_range(60, 120, 1) var Base_FOV = 75
-@export var ACCELERATION = 15.0
-@export var DEACCELERATION = 13.0
+@export var ACCELERATION = SPEED * 3.0
+@export var DEACCELERATION = SPEED * 2.5
 @export_range(0.1, 0.5, 0.02) var COYOTE_TIME = 0.2
 @export_range(1.0, 3.0, 0.1) var FALL_MULTIPLIER = 1.5
 @export_range(1.0, 3.0, 0.1) var LOW_JUMP_MULTIPLIER = 2.0
@@ -33,10 +33,10 @@ var base_gravity : float
 var Jump_buffer = 0.2
 var coyote_timer = 0.0
 var jump_buffer_timer = 0.0
-var FOV_multiplier = 12
+var FOV_multiplier = 30
 
 #headbob vars
-const BOB_FREQ = 2.4
+const BOB_FREQ = 1.4
 const BOB_AMP = 0.08
 var t_bob = 0.0
 var headbob_offset := Vector3.ZERO
