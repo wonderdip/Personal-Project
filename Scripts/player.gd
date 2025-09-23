@@ -34,6 +34,7 @@ var Jump_buffer = 0.2
 var coyote_timer = 0.0
 var jump_buffer_timer = 0.0
 var FOV_multiplier = 30
+var current_speed
 
 # --------- Headbob Variables ---------
 const BOB_FREQ = 1.4
@@ -132,8 +133,7 @@ func _physics_process(delta: float) -> void:
 	if is_on_floor():
 		if direction != Vector3.ZERO:
 			# Get current speed
-			var current_speed = horizontal_velocity.length()
-			
+			current_speed = horizontal_velocity.length()
 			# Apply diminishing returns to acceleration based on current speed
 			var speed_factor = 1.0 / (1.0 + current_speed * 0.2)  # Adjust 0.08 to control diminishing returns
 			var effective_acceleration = ACCELERATION * speed_factor
@@ -215,14 +215,14 @@ func camera_headbob(time: float, speed: float) -> Vector3:
 # --------- Gun Headbob Function ---------
 func gun_headbob(time: float, speed: float) -> Vector3:
 	var pos = Vector3.ZERO
-	
-	if speed > 0.1:
-		# Normalize speed for amplitude, gun bobs slightly less than camera
-		var speed_factor = sqrt(speed) / sqrt(BASE_SPEED)  # Square root normalization
-		speed_factor = clamp(speed_factor, 0.3, 1.3)  # Slightly more conservative than camera
-		
-		pos.y = sin(time * BOB_FREQ) * BOB_AMP * 0.8 * speed_factor  # 80% of camera bob
-		pos.x = cos(time * BOB_FREQ / 2) * BOB_AMP * 0.8 * speed_factor
+	if is_on_floor():
+		if speed > 0.1:
+			# Normalize speed for amplitude, gun bobs slightly less than camera
+			var speed_factor = sqrt(speed) / sqrt(BASE_SPEED)  # Square root normalization
+			speed_factor = clamp(speed_factor, 0.3, 1.3)  # Slightly more conservative than camera
+			
+			pos.y = sin(time * BOB_FREQ) * BOB_AMP * 0.8 * speed_factor  # 80% of camera bob
+			pos.x = cos(time * BOB_FREQ / 2) * BOB_AMP * 0.8 * speed_factor
 	
 	return pos
 
@@ -257,6 +257,7 @@ func shoot():
 		# Only spawn bullets if we have a barrel
 		if gun_barrel:
 			bullet_instance = bullet.instantiate()
+			bullet_instance.SPEED = bullet_instance.SPEED + 10
 			bullet_instance.position = gun_barrel.global_position
 			bullet_instance.transform.basis = gun_barrel.global_transform.basis
 			get_parent().add_child(bullet_instance)
