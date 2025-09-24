@@ -38,7 +38,7 @@ var current_speed
 
 # --------- Headbob Variables ---------
 const BOB_FREQ = 1.4
-const BOB_AMP = 0.08
+const BOB_AMP = 0.14
 var t_bob = 0.0
 var camera_headbob_offset := Vector3.ZERO
 var gun_headbob_offset := Vector3.ZERO
@@ -135,16 +135,27 @@ func _physics_process(delta: float) -> void:
 			# Get current speed
 			current_speed = horizontal_velocity.length()
 			# Apply diminishing returns to acceleration based on current speed
-			var speed_factor = 1.0 / (1.0 + current_speed * 0.2)  # Adjust 0.08 to control diminishing returns
+			var speed_factor = 1.0 / (1.0 + current_speed * 0.3)  # Adjust 0.08 to control diminishing returns
 			var effective_acceleration = ACCELERATION * speed_factor
-			
+				
 			# Apply sprint multiplier to acceleration, not target speed
 			if Input.is_action_pressed("sprint"):
 				effective_acceleration *= sprint_multiplier
 			
+			var new_speed: float
 			# Accelerate in the desired direction
-			var new_speed = current_speed + effective_acceleration * delta
-			horizontal_velocity = direction * new_speed
+			# 0 to 10 is faster so you dont start slow
+			if current_speed < 10:
+				new_speed = 1.1 * (current_speed + effective_acceleration * delta)
+			else:
+				new_speed = current_speed + effective_acceleration * delta
+			
+			# Scoping is very slower than not
+			if is_scoping == true:
+				horizontal_velocity = (direction * new_speed) * 0.85 
+			else:
+				horizontal_velocity = direction * new_speed
+				
 			print(snapped(new_speed, 1))
 		else:
 			# Instant deceleration when no input
@@ -221,8 +232,8 @@ func gun_headbob(time: float, speed: float) -> Vector3:
 			var speed_factor = sqrt(speed) / sqrt(BASE_SPEED)  # Square root normalization
 			speed_factor = clamp(speed_factor, 0.3, 1.3)  # Slightly more conservative than camera
 			
-			pos.y = sin(time * BOB_FREQ) * BOB_AMP * 0.8 * speed_factor  # 80% of camera bob
-			pos.x = cos(time * BOB_FREQ / 2) * BOB_AMP * 0.8 * speed_factor
+			pos.y = sin(time * BOB_FREQ) * BOB_AMP * 0.5 * speed_factor  # 80% of camera bob
+			pos.x = cos(time * BOB_FREQ / 2) * BOB_AMP * 0.5 * speed_factor
 	
 	return pos
 
@@ -257,7 +268,7 @@ func shoot():
 		# Only spawn bullets if we have a barrel
 		if gun_barrel:
 			bullet_instance = bullet.instantiate()
-			bullet_instance.SPEED = bullet_instance.SPEED + 10
+			bullet_instance.SPEED = bullet_instance.SPEED + velocity.length()
 			bullet_instance.position = gun_barrel.global_position
 			bullet_instance.transform.basis = gun_barrel.global_transform.basis
 			get_parent().add_child(bullet_instance)
@@ -273,7 +284,7 @@ func handle_fov(delta: float) -> void:
 	var sprint_factor = 1.5 if Input.is_action_pressed("sprint") else 1.0
 	var target_fov = Base_FOV + FOV_multiplier * speed_factor * sprint_factor
 	
-	camera.fov = lerp(camera.fov, target_fov, delta * 12.0)
+	camera.fov = lerp(camera.fov, target_fov, delta * 10.0)
 
 # --------- Gun Management ---------
 func update_current_gun():
